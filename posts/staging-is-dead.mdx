@@ -1,0 +1,102 @@
+---
+title: Staging is Dead, Long Live Staging.
+
+description: TODO
+
+thumbnail: /blog-thumbnails/a-mac-guys-guide-to-windows-development.webp
+
+status: 'draft'
+
+publishedAt:
+
+lastModified: 2024-12-07
+
+brief: How to get started with Windows Subsystem for Linux in ~3 steps.
+
+tags:
+  - Staging
+
+  - DevOps
+
+  - DeveloperProductivity
+
+  - EphemeralEnvironments
+
+  - PreviewEnvironments
+---
+
+# Staging is Dead, Long Live Staging
+
+## Let's give staging a round of applause
+
+I remember the first time I experienced working on a team that had a fantastic CI/CD pipeline.
+
+It felt revelatory compared to the setup at my first engineering role, where deploys to production involved creating an SSH connection to a production VM and then manually running `git pull` to update the code to match our latest production branch. You can imagine how liberated I felt when I finally had access to push button deploys, and dedicated "pre-prod" environments to vet changes against. And in that respect, let's give staging environments a standing ovation.
+
+## Staging Gotcha's & Headaches
+
+The first notion I want to challenge is the notion that code that deploys from a PR to a staging environment is "continuously integrated". Is it? How automated is it? It can be easy for us to configure pipelines to push to staging, and then award ourselves the presidential medal of honor and move along.
+
+I've worked on teams that have fallen into this trap. One company I worked at briefly, would deploy to staging in an automated way, but would only promote staging to production once or twice a month. There were a handful of reasons for this, and most of them smelled of "dysfunction". The _good reasons_ not to deploy to prod often would typically sound like:
+
+1. No one has verified the changes in staging yet.
+2. Last time we promoted staging to production we experienced an outage.
+3. We need a team of QA people to verify all of this through the next couple of weeks till our level of confidence is high.
+4. Staging has bad data in it right now, so we don't know if these changes actually work in production the same way they do in staging.
+
+Do you see how nothing about this is automated? In these types of environments the staging environment might as well be another developers machine, where the code "works sometimes". And in these environments there is almost zero developer accountability around what a merge to main means, leading to code with defects being validated later on, instead of being validated right away.
+
+### How to make Staging Better
+
+There exist both automated processes, and human processes you can employ to get around these pitfalls. And they usually look something like this:
+
+1. Staging data tends to be persistent, which means it needs to be cleaned / purged regularly to accurately reflect "the state of the world as we know it".
+2. An engineering culture that promotes every single PR to be validated in a staging as soon as it as merged.
+3. A great culture around automated tests running against staging or in a PR environment that help developers ship with the confidence that the software works as described.
+4. A culture that promotes deploying to prod frequently, even if its a manual step. Usually one or two engineers step up to promote staging to production every day or every few days to ensure that staging and production environments do not deviate so far that you have to inject manual quality assurance sprints that slow folks down, and get developers feedback later on instead of sooner.
+
+And while all of these ideas above are GREAT, and can lead to really effective engineering cultures, I can't help but feel like everything I just described can be moved back one layer.... into the PR layer.
+
+### Preview Environments FTW
+
+If you have cleaned your staging environment to the point where your level of
+
+- If you can orchestrate the creation of a staging environment in your CI pipeline, you can do the same thing per branch.
+
+- Staging can be a way to verify that the result of different ephemeral environments coming together works well, but those checks can often be run in a merge queue to accomplish the same thing.
+
+- Manually verifying in staging is often a smell that an E2E test in your ephemeral environments is missing and should be added.
+
+- If staging is a place for sandbox testing, why not have multiple, duplicative sandboxes?
+- Every PR is a "staging environment"
+- Encourages developers to get in the mindset of thinking about every line of code in their PR as shipping to a customer with some level of immediacy, which is a good thing.
+-
+
+## Pitfalls and Gotchas with Preview Environment
+
+- Large PRs become more risky when your code will be merged direct to production. I believe this is trade-off is worth while, and ultimately a great thing for developers. Reviewing and understanding large changes is hard, cumbersome, and leads to **\_waste**\_ in time, effort, & deliberation. Especially for startups, these risky time sinks are worth avoiding if possible.
+- In a trunk based environment, integrating multiple changes can be hard. You really have to embrace trunk based development, and small atomic, feature toggled changes for this to work well.
+
+## Some Next Steps
+
+Many folks will read this and feel that perhaps outright killing staging feels too risky. And if you find your team in this environment, I would consider running an experiment where you:
+
+- Experiment with the idea of trying to not let prod get too stale, and figure out what things need to happen for a more automated deploy process from stating to production.
+  - As you try to release to prod daily you will find you with the button you pressed was more automatic. And you'll start to see that the checks you are running before pressing said button can be turned into an automated workflow.
+- Run automatic data cleaning processes, and test automations against both PRs and staging.
+- As these processes begin to pass with high reliability, begin automatic deploys from staging to to production without a human in the loop when all your checks pass at some regular interval.
+
+If my hypothesis is true, what you will find is that as you tune your automation to make automatic deployment from staging to prod feel "safe" you will find that that your DevOps story becomes ever more ephemeral, leading to the feeling that you're just running all the automations you typically run in a PR environment twice, once when a developer makes changes on their branch, and once again on main. As that becomes noticed more, natural discussions will arise at the team level around what value staging is providing that ephemeral PR environments don't give you.
+
+## Appealing to the Human Element
+
+I've often believed that people won't remember all the details around how certain events went down, but they will remember how those events and the people involved _made them feel_. And here is what preview environments unlock.
+
+- Better change vetting. No longer do you need to rubber stamp a change to see how it works in staging. You can get feedback sooner because the PR becomes the spot where you can test how your changes behave in a "production like" environment.
+  - Sidebar; I also believe this leads to more extreme programming practices like pairing & mob programming, as folks try to figure out how they can get that feedback from peers at an EVEN earlier stage.
+
+### So Did You Kill Staging?
+
+I would argue no. If you made the move to preview environments you didn't kill staging, you made staging ephemeral. I've often sold PR environments by articulating that we're turning a single, more rigid staging environment into multiple, duplicative staging environment parallelized per change)\*. And that's honestly what preview environments are. It's a high fidelity, high trust staging environment that can be duplicated across every pull request in your repo.
+
+Staging is dead. Long live staging.
